@@ -17,6 +17,21 @@ let db;
 
 const PORT = process.env.PORT || 3000;
 
+const fs = require('fs');
+const path = require('path');
+
+const directoryPath = path.join(__dirname, 'node_modules', 'tesseract.js-core');
+
+fs.readdir(directoryPath, (err, files) => {
+    if (err) {
+        console.error('Erro ao listar arquivos:', err);
+        return;
+    }
+
+    console.log('Arquivos no diretório:', files);
+});
+
+
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
