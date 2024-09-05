@@ -48,7 +48,12 @@ module.exports = function() {
         const fileBuffer = req.file.buffer; // Buffer da imagem
     
         // Usar Tesseract para OCR na imagem
-        const text = await recognizeText(fileBuffer);
+        const text = await recognizeText(fileBuffer).catch(err => {
+          console.error('Erro ao reconhecer texto:', err);
+          res.status(500).json({ message: 'Erro ao reconhecer texto' });
+          return;
+        });
+    
         const placa = text.replace(/[^a-zA-Z0-9]/g, '').toUpperCase(); // Processar o texto OCR para extrair a placa
     
         // Preparar os dados para armazenar no MongoDB
@@ -58,7 +63,7 @@ module.exports = function() {
           data: new Date(),
         };
     
-        await Placas.insertOne(dataPlaca);
+        await Placas.create(dataPlaca);
     
         res.status(201).json({ message: 'Placa cadastrada com sucesso!', data: dataPlaca });
       } catch (error) {
@@ -74,7 +79,7 @@ module.exports = function() {
       const cidade = req.params.cidade;
 
       // Buscar os registros com base na cidade
-      const registros = await Placas.find({ cidade: cidade }).toArray();
+      const registros = await Placas.find({ cidade: cidade });
 
       if (registros.length === 0) {
         return res.status(404).json({ message: 'Nenhum registro encontrado para essa cidade.' });
@@ -112,7 +117,7 @@ module.exports = function() {
 
   router.get('/consulta/:placa', [validaToken(), validaUsuario()], async (req, res) => {
     try {
-      const placa = req.params.placas.toUpperCase();
+      const placa = req.params.placa.toUpperCase();
 
       const registro = await Placas.findOne({ placa: placa });
 

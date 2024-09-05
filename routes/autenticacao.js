@@ -35,12 +35,23 @@ module.exports = function() {
     });
 
     // http://localhost:3000/login      
-    // {
-    //     "email":"vanessa@gmail.com",
-    //     "senha":"12345678",
-    // }
-    router.post('/login', async (req, res) => {
-      const { email, senha } = req.body;
+    router.get('/login', async (req, res) => {
+      // Obter o cabeçalho Authorization
+      const authHeader = req.headers['authorization'];
+      
+      if (!authHeader) {
+        return res.status(401).json({ error: 'Cabeçalho de autenticação ausente' });
+      }
+
+      // Extrair o esquema e as credenciais
+      const [scheme, credentials] = authHeader.split(' ');
+
+      if (scheme !== 'Basic') {
+        return res.status(401).json({ error: 'Esquema de autenticação não suportado' });
+      }
+
+      // Decodificar as credenciais
+      const [email, senha] = Buffer.from(credentials, 'base64').toString().split(':');
 
       try {
         const user = await User.findOne({ email });

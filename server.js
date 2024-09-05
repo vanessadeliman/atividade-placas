@@ -6,7 +6,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // URL de conexão ao MongoDB
-const uri = `mongodb+srv://vanessalima:${process.env.SENHA}@cluster0.qk4ag.mongodb.net/`;
+const uri = `mongodb+srv://vanessalima:${process.env.SENHA}@cluster0.qk4ag.mongodb.net/atividade-placas`;
 
 async function main() {
   try {
@@ -34,7 +34,7 @@ main().catch(console.error);
 
 // Garantir que o cliente do MongoDB seja fechado quando o Node.js for encerrado
 process.on('SIGINT', async () => {
-  await client.close();
+  await mongoose.connection.close();
   process.exit();
 });
 

@@ -17,7 +17,7 @@ userSchema.pre('save', function(next) {
     const user = this;
 
     // Somente hasheia a senha se ela foi modificada (ou é nova)
-    if (!user.isModified('senhaUsu')) return next();
+    if (!user.isModified('senha')) return next();
 
     // Gera um sal e hasheia a senha
     bcrypt.genSalt(saltRounds, function(err, salt) {
@@ -26,14 +26,14 @@ userSchema.pre('save', function(next) {
                 return next(err);
             };
 
-            bcrypt.hash(user.senhaUsu, salt, function(err, hash) {
+            bcrypt.hash(user.senha, salt, function(err, hash) {
             if (err){
                 console.log(err);
                 return next(err);
             };
 
             // Substitui a senha inserida pelo hash
-            user.senhaUsu = hash;
+            user.senha = hash;
             next();
             });
         });
