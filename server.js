@@ -13,7 +13,9 @@ async function main() {
     mongoose.connect(uri)
     .then(() => console.log('Conectado ao MongoDB...'))
     .catch(err => console.error('Não foi possível conectar ao MongoDB...', err));
-      
+      app.get('/', (req, res) => {
+        res.json({ message: 'Bem-vindo' });
+      });
       // Mapeamento das rotas
       app.use(express.json());
       app.use(cadastroUser());

@@ -9,7 +9,7 @@ const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
 
-const directoryPath = path.join(__dirname, 'node_modules', 'tesseract.js-core');
+const directoryPath = path.join(__dirname, '../node_modules', 'tesseract.js-core');
 
 // Configuração do Multer para armazenar arquivos na memória
 const storage = multer.memoryStorage();
