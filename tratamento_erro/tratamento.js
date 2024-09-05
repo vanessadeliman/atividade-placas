@@ -4,7 +4,7 @@ const { default: mongoose } = require('mongoose');
 const { MongoError } = require('mongodb');
 
 module.exports = function tratamentoErro(error, res) {
-    console.error(error);
+
     if(error instanceof mongoose.Error.ValidationError) {
       erroMongoose(error, res);
     } else if(error instanceof MongoError) {

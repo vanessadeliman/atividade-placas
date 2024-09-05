@@ -17,65 +17,74 @@ module.exports = function() {
       try {
 
         console.log('Iniciando cadastro de novo usuário');
+        const existingUser = await User.findOne({ email: req.body.email });
+    
+        if (existingUser) {
+          return res.status(409).json({ error: 'Usuário já cadastrado' });
+        }
+        
+        if(!req.body.email){
+          return res.status(400).json({ error: 'E-mail é obrigatório' });
+        }
+
         const user = new User(req.body);
        
         await user.save();
 
         console.log('Usuário cadastrado com sucesso: '+user._id);
 
-        req.body.autorizacao = {};
-        req.body._id = user._id;
-        req.body.autorizacao.token = await gerarToken(req.body, '40m');
+        const token = await gerarToken(req.body, '40m');
 
-        res.status(200).send(req.body);
+        res.status(200).send({ autorizacao : token});
 
       } catch (error) {
         tratamentoErro(error, res);
       }
     });
 
-    // http://localhost:3000/login      
-    router.get('/login', async (req, res) => {
-      // Obter o cabeçalho Authorization
-      const authHeader = req.headers['authorization'];
-      
-      if (!authHeader) {
-        return res.status(401).json({ error: 'Cabeçalho de autenticação ausente' });
-      }
+  router.get('/login', async (req, res) => {
+  // Obter o cabeçalho Authorization
+  const authHeader = req.headers['authorization'];
 
-      // Extrair o esquema e as credenciais
-      const [scheme, credentials] = authHeader.split(' ');
+  if (!authHeader) {
+    return res.status(401).json({ error: 'Cabeçalho de autenticação ausente' });
+  }
 
-      if (scheme !== 'Basic') {
-        return res.status(401).json({ error: 'Esquema de autenticação não suportado' });
-      }
+  // Extrair o esquema e as credenciais
+  const [scheme, credentials] = authHeader.split(' ');
 
-      // Decodificar as credenciais
-      const [email, senha] = Buffer.from(credentials, 'base64').toString().split(':');
+  if (scheme !== 'Basic') {
+    return res.status(401).json({ error: 'Esquema de autenticação não suportado' });
+  }
 
-      try {
-        const user = await User.findOne({ email });
+  // Decodificar as credenciais
+  const [email, senha] = Buffer.from(credentials, 'base64').toString().split(':');
 
-        if (!user) {
-          throw new Error("Não foi encontrado nenhum usuário com a credencial infomada");
-        }
+  try {
+    const user = await User.findOne({ email });
 
-        const senhaCorreta = await bcrypt.compare(senha, user.senha);
+    if (!user) {
+      return res.status(401).json({ error: 'Usuário não encontrado' });
+    }
 
-        if (!senhaCorreta) {
-          throw new Error("Usuário ou senha incorreta");
-        }
+    // Verificar a senha
+    const senhaCorreta = await bcrypt.compare(senha, user.senha);
 
-        const dadosToken = {_id: user._id };
-        req.body.autorizacao = {};
-        req.body.autorizacao.token = await gerarToken(dadosToken, '40m');
-        
-        res.status(200).json(req.body);
-      } catch (error) {
-        error.code = 401;
-        tratamentoErro(error,res);
-      }
-    });
+    if (!senhaCorreta) {
+      return res.status(401).json({ error: 'Usuário ou senha incorreta' });
+    }
+
+    // Gerar o token
+    const dadosToken = { _id: user._id };
+    const token = await gerarToken(dadosToken, '40m');
+
+    // Retornar a resposta de sucesso
+    res.status(200).json({autorizacao:token});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
 
     return router;
 };

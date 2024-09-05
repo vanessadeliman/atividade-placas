@@ -60,7 +60,7 @@ function saveVideo(buffer, filename) {
 module.exports = function() {
     const router = express.Router();
 
-    router.post('/cadastroPlaca', [validaToken(), validaUsuario()], upload.single('foto'), async (req, res) => {
+    router.post('/cadastroPlaca', [validaToken()], upload.single('foto'), async (req, res) => {
       try {
         const cidade = req.body.cidade;
         if (!req.file) {
@@ -96,7 +96,7 @@ module.exports = function() {
 
 
   // Rota para gerar o PDF com base na cidade
-  router.get('/relatorio/cidade/:cidade', [validaToken(), validaUsuario()], async (req, res) => {
+  router.get('/relatorio/cidade/:cidade', [validaToken()], async (req, res) => {
     try {
       const cidade = req.params.cidade;
 
@@ -137,7 +137,7 @@ module.exports = function() {
     }
   });
 
-  router.get('/consulta/:placa', [validaToken(), validaUsuario()], async (req, res) => {
+  router.get('/consulta/:placa', [validaToken()], async (req, res) => {
     try {
       const placa = req.params.placa.toUpperCase();
 
